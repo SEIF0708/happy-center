@@ -1,0 +1,12 @@
+export const APP_NAME = "Happy Center Workforce";
+export const TIMEZONE = "Europe/Istanbul";
+export const DEFAULT_DAILY_SALARY_KURUS = 135_000;
+export const MAX_DAILY_SALARY_KURUS = 50_000_000;
+export const WORKER_CODE_PREFIX = "HC";
+export const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+export const PHOTO_MAX_EDGE = 1280;
+export const PHOTO_BUCKET = "worker-photos";
+export const PHOTO_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const LOCALE_COOKIE = "hc_locale";
+export const DRAFT_STORAGE_PREFIX = "hc-attendance-draft:";
+export const WEEK_STARTS_ON = 1 as const;
