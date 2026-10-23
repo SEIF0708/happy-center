@@ -51,6 +51,26 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
     throw error;
   }
 
+  let completedWeeks: Array<{ start: string; end: string }> = [];
+  if (weekly) {
+    const currentWeekStart = startOfWeekMonday(today);
+    const { data: historyInstances, error: historyError } = await supabase
+      .from("shift_instances")
+      .select("business_date")
+      .eq("status", "submitted")
+      .gte("business_date", addCalendarDays(currentWeekStart, -84))
+      .lt("business_date", currentWeekStart)
+      .order("business_date", { ascending: false })
+      .limit(500);
+    if (historyError) {
+      console.error("Weekly report history query failed:", historyError.message);
+      return <div className="notice notice-error" role="alert">{t.reportLoadError}</div>;
+    }
+    const historyWeekStarts = [...new Set((historyInstances ?? [])
+      .map((instance) => startOfWeekMonday(instance.business_date)))].slice(0, 12);
+    completedWeeks = historyWeekStarts.map((start) => ({ start, end: endOfWeekSunday(start) }));
+  }
+
   const confirmedInstances = report.instances.filter((instance) => instance.status === "submitted");
   const incompleteInstances = report.instances.filter((instance) => instance.status !== "submitted");
   const presentRecords = report.records.filter((record) => record.status === "present");
@@ -110,6 +130,23 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
           : <input className="text-input" id="date" name="date" type="date" defaultValue={date} />}
         <button className="button button-primary" type="submit">{arabic ? "عرض" : "Göster"}</button>
       </form>
+
+      {weekly && (
+        <details className="reports-history">
+          <summary><strong>{t.reportsHistory}</strong><span>{t.pastWeeks}</span></summary>
+          {completedWeeks.length ? (
+            <ol className="reports-history-list">
+              {completedWeeks.map((period) => (
+                <li key={period.start}>
+                  <Link href={`/reports?view=weekly&week=${period.start}`}>
+                    {formatDate(period.start, locale)} — {formatDate(period.end, locale)}
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          ) : <p className="muted">{t.noReportHistory}</p>}
+        </details>
+      )}
 
       <div className="report-metrics">
         <Metric label={t.workedShifts} value={String(confirmedInstances.length)} />

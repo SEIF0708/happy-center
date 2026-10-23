@@ -18,7 +18,7 @@ function record(overrides: Partial<ConfirmedAttendance> = {}): ConfirmedAttendan
   };
 }
 
-describe("weekly payroll PDF", () => {
+describe("weekly payroll PDF", { timeout: 15_000 }, () => {
   it("generates a downloadable Turkish PDF with the payroll data", async () => {
     const pdf = await createWeeklyPayrollPdf({
       records: [

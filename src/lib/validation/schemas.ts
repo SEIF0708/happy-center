@@ -43,9 +43,17 @@ export const loginSchema = z.object({
 
 export const attendanceDecisionMapSchema = z.record(z.string().uuid(), attendanceStatusSchema);
 
+const timeSchema = z
+  .string()
+  .regex(/^\d{2}:\d{2}$/)
+  .refine((value) => {
+    const [hours, minutes] = value.split(":").map(Number);
+    return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
+  });
+
 export const shiftCreateSchema = z.object({
   name: z.string().trim().min(2).max(80),
-  startTime: z.string().regex(/^\d{2}:\d{2}$/),
-  endTime: z.string().regex(/^\d{2}:\d{2}$/),
+  startTime: timeSchema,
+  endTime: timeSchema,
   attendanceWindowMinutes: z.number().int().min(1).max(720),
 });

@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { assignWorkerShift, type SettingsActionResult } from "@/app/actions/settings";
 import { deactivateWorker } from "@/app/actions/workers";
 import { formatTryFromKurus } from "@/lib/money";
 import { normalizeSearch } from "@/lib/attendance-list";
+import { getMessages } from "@/lib/i18n";
 import { workerIdShareMessage, whatsappShareUrl } from "@/lib/whatsapp";
 import type { Locale } from "@/types/domain";
 
@@ -19,12 +21,22 @@ export type WorkerListItem = {
   shift_name: string;
 };
 
+type WorkerShiftOption = {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  isActive: boolean;
+};
+
 export function WorkerDirectory({
   workers,
+  shifts,
   locale,
   createdCode,
 }: {
   workers: WorkerListItem[];
+  shifts: WorkerShiftOption[];
   locale: Locale;
   createdCode?: string;
 }) {
@@ -37,6 +49,7 @@ export function WorkerDirectory({
   const [deactivationError, setDeactivationError] = useState(false);
   const router = useRouter();
   const arabic = locale === "ar";
+  const t = getMessages(locale);
   const filtered = useMemo(() => {
     const needle = normalizeSearch(query);
     return workers.filter((worker) => {
@@ -176,6 +189,16 @@ export function WorkerDirectory({
                 <strong className="worker-name">{worker.full_name}</strong>
                 <span className="worker-code">{worker.worker_code}</span>
                 <span className="worker-meta">{worker.shift_name} · {formatTryFromKurus(worker.daily_salary_kurus, locale)} / {arabic ? "يوم" : "gün"}</span>
+                {shifts.length > 0 && (
+                  <WorkerShiftAssignment
+                    key={`${worker.id}:${worker.shift_id}`}
+                    locale={locale}
+                    shiftId={worker.shift_id}
+                    shifts={shifts}
+                    t={t}
+                    workerId={worker.id}
+                  />
+                )}
               </div>
               <span className={`employment-badge ${worker.employment_status}`}>
                 {worker.employment_status === "active"
@@ -256,5 +279,83 @@ export function WorkerDirectory({
         </div>
       )}
     </>
+  );
+}
+
+function WorkerShiftAssignment({
+  locale,
+  shiftId,
+  shifts,
+  t,
+  workerId,
+}: {
+  locale: Locale;
+  shiftId: string;
+  shifts: WorkerShiftOption[];
+  t: ReturnType<typeof getMessages>;
+  workerId: string;
+}) {
+  const arabic = locale === "ar";
+  const router = useRouter();
+  const [selectedShiftId, setSelectedShiftId] = useState(shiftId);
+  const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  function handleSave() {
+    setMessage("");
+    setIsError(false);
+    startTransition(async () => {
+      try {
+        const result = await assignWorkerShift(workerId, selectedShiftId);
+        if (!result.ok) {
+          const errors: Record<Extract<SettingsActionResult, { ok: false }>["error"], string> = {
+            invalid: arabic ? "بيانات الوردية غير صالحة." : "Vardiya bilgisi geçersiz.",
+            unauthorized: arabic ? "انتهت الجلسة. سجّل الدخول مجدداً." : "Oturum süresi doldu. Tekrar giriş yapın.",
+            database_update_required: arabic
+              ? "يلزم تطبيق ترحيل إعدادات المشرف والورديات في Supabase."
+              : "Supabase'te 20261023120000_supervisor_settings_and_shifts.sql migration'ını uygulayın.",
+            shift_in_progress: t.workerShiftInProgress,
+            failed: t.workerShiftFailed,
+          };
+          setMessage(errors[result.error]);
+          setIsError(true);
+          return;
+        }
+        setMessage(t.workerShiftSaved);
+        router.refresh();
+      } catch (error) {
+        console.error("Worker shift assignment request failed:", error);
+        setMessage(t.workerShiftFailed);
+        setIsError(true);
+      }
+    });
+  }
+
+  return (
+    <div className="worker-shift-assignment" dir={arabic ? "rtl" : "ltr"}>
+      <label className="sr-only" htmlFor={`worker-shift-${workerId}`}>{t.workerShift}</label>
+      <select
+        className="text-input"
+        id={`worker-shift-${workerId}`}
+        onChange={(event) => setSelectedShiftId(event.target.value)}
+        value={selectedShiftId}
+      >
+        {shifts.map((shift) => (
+          <option key={shift.id} value={shift.id}>
+            {shift.name} · {shift.startTime}–{shift.endTime}{shift.isActive ? ` · ${t.activeShift}` : ""}
+          </option>
+        ))}
+      </select>
+      <button
+        className="button button-secondary"
+        disabled={pending || selectedShiftId === shiftId}
+        onClick={handleSave}
+        type="button"
+      >
+        {pending ? t.saving : t.saveWorkerShift}
+      </button>
+      {message && <span className={isError ? "form-error" : "form-success"} role={isError ? "alert" : "status"}>{message}</span>}
+    </div>
   );
 }

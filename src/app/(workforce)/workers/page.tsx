@@ -34,7 +34,9 @@ export default async function WorkersPage({ searchParams }: { searchParams: Sear
     return <div className="notice notice-error" role="alert">{arabic ? "تعذّر تحميل العاملين." : "Çalışan listesi yüklenemedi."}</div>;
   }
 
-  const { data: shifts, error: shiftsError } = await supabase.from("shifts").select("id,name");
+  const { data: shifts, error: shiftsError } = await supabase.from("shifts")
+    .select("id,name,start_time,end_time,is_active")
+    .order("start_time");
   if (shiftsError) {
     return <div className="notice notice-error" role="alert">{arabic ? "تعذّر تحميل الورديات." : "Vardiyalar yüklenemedi."}</div>;
   }
@@ -63,6 +65,13 @@ export default async function WorkersPage({ searchParams }: { searchParams: Sear
       <WorkerDirectory
         createdCode={rows?.some((worker) => worker.worker_code === created) ? created : undefined}
         locale={locale}
+        shifts={(shifts ?? []).map((shift) => ({
+          id: shift.id,
+          name: shift.name,
+          startTime: shift.start_time.slice(0, 5),
+          endTime: shift.end_time.slice(0, 5),
+          isActive: shift.is_active,
+        }))}
         workers={workers}
       />
     </section>

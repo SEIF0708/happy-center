@@ -522,6 +522,12 @@ input:focus-visible {
   padding: 10px 12px;
 }
 
+.form-success {
+  color: var(--success);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .login-button {
   margin-top: 8px;
   width: 100%;
@@ -704,6 +710,30 @@ input:focus-visible {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.4;
+}
+
+.worker-shift-assignment {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 6px;
+}
+
+.worker-shift-assignment .text-input {
+  flex: 1 1 180px;
+  min-height: 40px;
+  padding-inline: 9px;
+}
+
+.worker-shift-assignment .button {
+  min-height: 40px;
+}
+
+.worker-shift-assignment .form-error,
+.worker-shift-assignment .form-success {
+  flex-basis: 100%;
+  margin: 0;
 }
 
 .employment-badge {
@@ -1383,6 +1413,164 @@ input:focus-visible {
   justify-content: center;
 }
 
+.settings-page {
+  display: grid;
+  gap: 18px;
+}
+
+.settings-section {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+.settings-section > h2,
+.settings-section-heading h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.settings-section-heading p {
+  margin: 6px 0 0;
+}
+
+.settings-form {
+  display: grid;
+  gap: 9px;
+  max-width: 620px;
+}
+
+.settings-form-actions,
+.settings-shift-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.settings-shift-list {
+  display: grid;
+  gap: 9px;
+}
+
+.settings-shift-card {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 13px;
+}
+
+.settings-shift-details {
+  display: grid;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.settings-shift-title {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.settings-shift-title h3,
+.shift-editor h3 {
+  font-size: 15px;
+  margin: 0;
+}
+
+.settings-shift-details p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.shift-state {
+  background: #eef0f2;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 8px;
+}
+
+.shift-state.active {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.shift-editor {
+  border-top: 1px solid var(--line);
+  max-width: none;
+  padding-top: 16px;
+}
+
+.settings-shift-fields {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.settings-shift-fields > div {
+  display: grid;
+  gap: 7px;
+}
+
+.reports-history {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 0 0 18px;
+  padding: 0 14px;
+}
+
+.reports-history summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  list-style-position: inside;
+  min-height: 48px;
+}
+
+.reports-history summary span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.reports-history-list {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 10px 0 13px;
+}
+
+.reports-history-list a {
+  border-radius: 7px;
+  color: var(--muted);
+  display: block;
+  font-size: 13px;
+  padding: 9px 10px;
+}
+
+.reports-history-list a:hover {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+}
+
 @media (max-width: 760px) {
   .sidebar {
     display: none;
@@ -1534,6 +1722,37 @@ input:focus-visible {
     flex: 1 0 100%;
     font-size: 13px;
     min-height: 44px;
+  }
+
+  .worker-shift-assignment {
+    align-items: stretch;
+  }
+
+  .worker-shift-assignment .text-input,
+  .worker-shift-assignment .button {
+    flex: 1 1 100%;
+    min-height: 44px;
+  }
+
+  .settings-section {
+    padding: 16px;
+  }
+
+  .settings-section .button {
+    min-height: 44px;
+  }
+
+  .settings-shift-fields,
+  .reports-history-list {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-shift-actions {
+    width: 100%;
+  }
+
+  .settings-shift-actions .button {
+    flex: 1;
   }
 
   .directory-toolbar .search-label {
